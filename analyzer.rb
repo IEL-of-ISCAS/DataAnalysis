@@ -56,6 +56,10 @@ ARGV.each do |filename|
 		end
 	end
 
+	if groups.length == 0
+		next
+	end
+
 	type = filename.split("_")[-1][0..-5]
 	radius = groups[0][0].radius
 	valid_groups = groups.slice(1, 25)
@@ -135,6 +139,10 @@ ARGV.each do |filename|
 		# 	end
 		# end
 
+		if !cur_hover_points || cur_hover_points.length == 0
+			next
+		end
+
 		avg = calcAvg(cur_hover_points)
 		cov = calcCovirance(avg, cur_hover_points)
 		std_dev = Math.sqrt(cov)
@@ -159,5 +167,5 @@ ARGV.each do |filename|
 	sum_scale += avg_scale
 	avg_point, avg_cov = hover_points.inject {|sum, value| [[sum[0][0] + value[0][0], sum[0][1] + value[0][1]], sum[1] + value[1]]}
 
-	puts "#{type} #{total_ticks} #{sensor_ticks} #{touch_ticks} #{avg_scale} #{radius} #{avg_transition} #{avg_transition / radius} #{avg_point[0]} #{avg_point[1]} #{avg_cov} #{error_count} #{total_count} #{error_count * 1.0 / total_count}"
+	puts "#{type} #{total_ticks}\t#{sensor_ticks}\t#{touch_ticks}\t#{valid_groups.length}\t#{total_ticks * 1.0 / valid_groups.length}\t#{touch_ticks}\t#{avg_scale}\t#{radius}\t#{avg_transition}\t#{avg_transition / radius}"#\t#{avg_point[0]}\t#{avg_point[1]}\t#{avg_cov}"
 end
