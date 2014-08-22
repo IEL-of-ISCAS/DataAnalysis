@@ -1,23 +1,9 @@
 #!/usr/bin/env ruby
+require './actionItem.rb'
 
 # 指针悬停位置均值的方差
 # 用户调整size的平均值
 # 从哪里开始粗定位转细定位
-class ActionItem
-	attr_accessor :action_id, :tick, :cur_x, :cur_y, :tar_x, :tar_y, :scale, :hit, :radius, :tar_id
-
-	def initialize content
-		@action_id, @tick, @cur_x, @cur_y, @tar_x, @tar_y, @scale, dummy, dummy, @hit, @radius, @tar_id = content.split("\t")
-		@cur_x = @cur_x.to_f
-		@cur_y = @cur_y.to_f
-		@tar_x = @tar_x.to_f
-		@tar_y = @tar_y.to_f
-		@scale = @scale.to_f
-		@radius = @radius.to_f
-		@hit = (@hit.to_i == 1)
-	end
-end
-
 def distance(a, b)
 	(b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2
 end
@@ -167,5 +153,5 @@ ARGV.each do |filename|
 	sum_scale += avg_scale
 	avg_point, avg_cov = hover_points.inject {|sum, value| [[sum[0][0] + value[0][0], sum[0][1] + value[0][1]], sum[1] + value[1]]}
 
-	puts "#{type} #{total_ticks}\t#{sensor_ticks}\t#{touch_ticks}\t#{valid_groups.length}\t#{total_ticks * 1.0 / valid_groups.length}\t#{touch_ticks}\t#{avg_scale}\t#{radius}\t#{avg_transition}\t#{avg_transition / radius}"#\t#{avg_point[0]}\t#{avg_point[1]}\t#{avg_cov}"
+	puts "#{type}\t#{total_ticks}\t#{sensor_ticks}\t#{touch_ticks}\t#{valid_groups.length}\t#{total_ticks * 1.0 / valid_groups.length}\t#{avg_scale}\t#{radius}"#\t#{avg_transition}\t#{avg_transition / radius}"#\t#{avg_point[0]}\t#{avg_point[1]}\t#{avg_cov}"
 end
