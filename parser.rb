@@ -4,6 +4,7 @@ require_relative './actionItem.rb'
 class Parser
 	attr_accessor :targets
 	attr_accessor :sensorFirst
+	attr_accessor :sensorStartPoint, :touchStartPoint
 	attr_accessor :sensorTime, :touchTime, :sensorDistance, :touchDistance
 	attr_accessor :curIndex, :lastTarId
 	attr_accessor :sensorStartTime, :sensorEndTime, :touchStartTime, :touchEndTime
@@ -21,10 +22,12 @@ class Parser
 	end
 
 	def parse
-		@sensorTime = []
-		@touchTime = []
+		@sensorTime     = []
+		@touchTime      = []
 		@sensorDistance = []
-		@touchDistance = []
+		@touchDistance  = []
+		@sensorWsqr     = []
+		@touchWsqr      = []
 
 		result = []
 		curTarId = 0
@@ -46,46 +49,36 @@ class Parser
 
 		@targets.each_with_index do |section, sectionIdx|
 			state = :startOfSection
+			@touchStartPoint = nil
+			@sensorStartPoint = nil
 
 			# For each group, calculate 2 different values
 			section.each do |item|
 				if @sensorFirst
 					if state == :startOfSection
 						if item.scale == -100
-							if sectionIdx > 0
-								lastItem = nil
-								lastSection = @targets[sectionIdx - 1]
-								lastSection.reverse.each do |item|
-									if item.hit
-										lastItem = item
-									end
-								end
-								
-								if !lastItem
-									break
-								end
-								diffX = lastItem.cur_x - item.tar_x
-								diffY = lastItem.cur_y - item.tar_y
-							else
-								diffX = item.cur_x - item.tar_x
-								diffY = item.cur_y - item.tar_y
-							end
-
+							break if sectionIdx == 0
 							@sensorStartTime = item.tick.to_i
-							@sensorDistance << Math.sqrt(diffX * diffX + diffY * diffY)
+							@sensorStartPoint = [item.cur_x, item.cur_y]
 							state = :sensorWorking
 						end
 					elsif state == :sensorWorking
 						if item.scale == -300
 							@sensorEndTime = item.tick.to_i
 							state = :touchBegin
+
+							diffX = @sensorStartPoint[0] - item.cur_x
+							diffY = @sensorStartPoint[1] - item.cur_y
+							@sensorDistance << Math.sqrt(diffX * diffX + diffY * diffY)
+
+							diffX = item.cur_x - item.tar_x
+							diffY = item.cur_y - item.tar_y
+							@sensorWsqr << Math.sqrt(diffX * diffX + diffY * diffY)
 						end
 					elsif state == :touchBegin
 						if item.scale == 100
 							@touchStartTime = item.tick.to_i
-							diffX = item.cur_x - item.tar_x
-							diffY = item.cur_y - item.tar_y
-							@touchDistance << Math.sqrt(diffX * diffX + diffY * diffY)
+							@touchStartPoint = [item.cur_x, item.cur_y]
 							break
 						end
 					end
@@ -114,10 +107,20 @@ class Parser
 				end
 			end
 
+			next unless @sensorStartPoint != nil
+
 			section.reverse.each do |item|
-				if item.hit
+				if item.hit and item.tar_id == (sectionIdx % 25)
 					if @sensorFirst
 						@touchEndTime = item.tick.to_i	
+
+						diffX = item.cur_x - @touchStartPoint[0]
+						diffY = item.cur_y - @touchStartPoint[1]
+						@touchDistance << Math.sqrt(diffX * diffX + diffY * diffY)
+
+						diffX = item.cur_x - item.tar_x
+						diffY = item.cur_y - item.tar_y
+						@touchWsqr << Math.sqrt(diffX * diffX + diffY * diffY)
 					else
 						@sensorEndTime = item.tick.to_i
 					end
@@ -129,6 +132,6 @@ class Parser
 			@touchTime  << @touchEndTime  - @touchStartTime
 		end
 
-		[@sensorTime, @sensorDistance, @touchTime, @touchDistance]
+		[@sensorTime, @sensorDistance, @sensorWsqr, @touchTime, @touchDistance, @touchWsqr]
 	end
 end

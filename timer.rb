@@ -32,13 +32,15 @@ class Timer
 			parser.feed line
 		end
 
-		sensorTime, sensorDistance, touchTime, touchDistance = parser.parse
+		sensorTime, sensorDistance, sensorWsqr, touchTime, touchDistance, touchWsqr = parser.parse
 
 		File.open(@outputPath, 'w') do |file|
 			file.write("#{sensorTime.join(",")}\n")
 			file.write("#{sensorDistance.join(",")}\n")
+			file.write("#{sensorWsqr.join(",")}\n")
 			file.write("#{touchTime.join(",")}\n")
 			file.write("#{touchDistance.join(",")}\n")
+			file.write("#{touchWsqr.join(",")}\n")
 		end
 	end
 end
