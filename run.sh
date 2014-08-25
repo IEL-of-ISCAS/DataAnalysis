@@ -12,5 +12,6 @@ find data -name "*.txt" | grep -v "time.txt" | xargs rm -f
 
 # Rename & Clean up
 cp README.txt data/
+rm -rf 无字母结果/
 mv data/ 无字母结果/
 cp -r data_bak/ data/

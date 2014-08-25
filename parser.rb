@@ -73,7 +73,7 @@ class Parser
 
 							diffX = item.cur_x - item.tar_x
 							diffY = item.cur_y - item.tar_y
-							@sensorWsqr << Math.sqrt(diffX * diffX + diffY * diffY)
+							@sensorWsqr << (diffX * diffX + diffY * diffY)
 						end
 					elsif state == :touchBegin
 						if item.scale == 100
@@ -120,7 +120,7 @@ class Parser
 
 						diffX = item.cur_x - item.tar_x
 						diffY = item.cur_y - item.tar_y
-						@touchWsqr << Math.sqrt(diffX * diffX + diffY * diffY)
+						@touchWsqr << (diffX * diffX + diffY * diffY)
 					else
 						@sensorEndTime = item.tick.to_i
 					end
